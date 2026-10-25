@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Juegos</title>
+<style>
+  :root { box-sizing: border-box; --bg:#050505; --card:#121212; --line:#2a2a2a; --gray:#8a8a8a; --white:#f5f5f5; }
+  *, *::before, *::after { box-sizing: inherit; }
+  body {
+    margin: 0; min-height: 100vh;
+    background: radial-gradient(circle at 50% 20%, #1c1c1c 0%, var(--bg) 70%);
+    color: var(--white);
+    font-family: "Trebuchet MS", Helvetica, Arial, sans-serif;
+    display: flex; align-items: center; justify-content: center;
+    padding: 20px;
+    padding-top: calc(20px + env(safe-area-inset-top, 0px));
+    padding-bottom: calc(20px + env(safe-area-inset-bottom, 0px));
+  }
+  .grid { display: flex; flex-wrap: wrap; justify-content: center; gap: 18px; max-width: 900px; }
+  .item { width: min(42vw, 150px); display: flex; flex-direction: column; gap: 8px; }
+  .tile {
+    width: 100%; aspect-ratio: 1 / 1;
+    border-radius: 22px; border: 1px solid var(--line);
+    background: linear-gradient(160deg, #1e1e1e, var(--card));
+    box-shadow: 0 0 0 4px #0a0a0a, 0 8px 24px rgba(0,0,0,.8);
+    position: relative; overflow: hidden;
+    display: flex; flex-direction: column; justify-content: flex-end; align-items: center;
+  }
+  .tile img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+  .tile .placeholder { position: absolute; top: 30%; left: 50%; transform: translateX(-50%); font-size: 2.2rem; opacity: .2; }
+  .tile .shade { position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,.92) 0%, rgba(0,0,0,.2) 55%, transparent 100%); }
+  .tile .label {
+    position: relative; padding: 12px 8px 14px; text-align: center;
+    font-weight: 700; font-size: .9rem; letter-spacing: .1em; text-transform: uppercase;
+    color: var(--white); text-shadow: 0 2px 6px #000;
+  }
+  .tile .label small { display: block; color: var(--gray); font-size: .55rem; letter-spacing: .25em; margin-bottom: 3px; }
+  .links { display: flex; flex-direction: column; gap: 6px; }
+  .links a {
+    display: block; text-align: center; padding: 8px; border-radius: 10px;
+    background: var(--white); color: #0a0a0a; font-weight: 700; font-size: .75rem; text-decoration: none;
+    border: 1px solid var(--white);
+  }
+  .links a:hover { background: transparent; color: var(--white); }
+  .links a.secundario { background: #1a1a1a; color: var(--white); border-color: var(--line); }
+  .links a.secundario:hover { border-color: var(--gray); }
+</style>
+</head>
+<body>
+
+<div class="grid" id="grid"></div>
+
+<script>
+  /* ===== CONFIGURACIÓN: edita cada cuadro por separado ===== */
+  // Cada bloque { ... } es un cuadro. Cambia solo el que quieras.
+  // imagen: URL de una imagen, o "" para no usar imagen.
+  // enlaces: lista de { texto, url }. Puedes poner los que quieras (o ninguno: []).
+
+  const CUADROS = [
+    {
+      titulo: "Gang Beasts",
+      subtitulo: "Aventura Acción",
+      imagen: "https://www.superpsx.com/wp-content/uploads/2024/09/Gang-Beasts-PS4-PKG.webp",
+      enlaces: [
+        { texto: "ACTUALIZACIÓN", url: "https://www.youtube.com/" },
+        { texto: "JUEGO", url: "https://drive.google.com/file/d/11yzyn-Kmzz_sMt6M_K2WeKs96geR3j_F/view?usp=drivesdk" }
+      ]
+    },
+    {
+      titulo: "Dragón Ball Fighters Z",
+      subtitulo: "Acción Combate",
+      imagen: "https://www.superpsx.com/wp-content/uploads/2024/09/DRAGON-BALL-FighterZ-PS4-PKG.webp",
+      enlaces: [
+        { texto: "ACTUALIZACIÓN", url: "https://www.youtube.com/" },
+        { texto: "JUEGO", url: "https://www.youtube.com/" }
+      ]
+    },
+    {
+      titulo: "Juego 3",
+      subtitulo: "Categoría",
+      imagen: "",
+      enlaces: [
+        { texto: "ACTUALIZACIÓN", url: "https://www.youtube.com/" },
+        { texto: "JUEGO", url: "https://www.youtube.com/" }
+      ]
+    },
+    {
+      titulo: "Juego 4",
+      subtitulo: "Categoría",
+      imagen: "",
+      enlaces: [
+        { texto: "ACTUALIZACIÓN", url: "https://www.youtube.com/" },
+        { texto: "JUEGO", url: "https://www.youtube.com/" }
+      ]
+    },
+    {
+      titulo: "Juego 5",
+      subtitulo: "Categoría",
+      imagen: "",
+      enlaces: [
+        { texto: "ACTUALIZACIÓN", url: "https://www.youtube.com/" },
+        { texto: "JUEGO", url: "https://www.youtube.com/" }
+      ]
+    }
+  ];
+
+  /* ======================================================== */
+
+  const grid = document.getElementById('grid');
+
+  CUADROS.forEach(c => {
+    const item = document.createElement('div');
+    item.className = 'item';
+
+    const tile = document.createElement('div');
+    tile.className = 'tile';
+
+    const placeholder = document.createElement('div');
+    placeholder.className = 'placeholder';
+    placeholder.textContent = '☣';
+
+    const shade = document.createElement('div');
+    shade.className = 'shade';
+
+    const label = document.createElement('div');
+    label.className = 'label';
+    const small = document.createElement('small');
+    small.textContent = c.subtitulo;
+    label.append(small, c.titulo);
+
+    tile.append(placeholder, shade, label);
+
+    if (c.imagen) {
+      const img = document.createElement('img');
+      img.src = c.imagen;
+      img.alt = c.titulo;
+      tile.insertBefore(img, placeholder);
+      placeholder.hidden = true;
+    }
+
+    const links = document.createElement('div');
+    links.className = 'links';
+    c.enlaces.forEach((e, i) => {
+      const a = document.createElement('a');
+      a.href = e.url;
+      a.target = '_blank';
+      a.rel = 'noopener noreferrer';
+      a.textContent = e.texto;
+      if (i > 0) a.className = 'secundario';
+      links.appendChild(a);
+    });
+
+    item.append(tile, links);
+    grid.appendChild(item);
+  });
+</script>
+</body>
+</html>
